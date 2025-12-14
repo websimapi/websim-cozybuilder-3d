@@ -10,59 +10,45 @@ import { analyzeAsset } from './ai.js';
 // --- 3D Components ---
 
 function DraggableAsset({ asset, isSelected, onSelect, position, rotation, onDelete }) {
-    // Safety check for URL
-    if (!asset.url) return null;
-
-    try {
-        const { scene } = useGLTF(asset.url);
-        const copiedScene = React.useMemo(() => scene.clone(), [scene]);
-        
-        return (
-            <group position={position} rotation={rotation} onClick={(e) => {
-                e.stopPropagation();
-                onSelect();
-            }}>
-                <primitive object={copiedScene} />
-                {isSelected && (
-                    <Html position={[0, 1.5, 0]}>
-                        <div className="bg-white/80 p-2 rounded-full shadow-lg backdrop-blur flex gap-2">
-                        <button onClick={onDelete} className="p-1 text-red-500 hover:bg-red-100 rounded">
-                            <Trash2 size={16} />
-                        </button>
-                        </div>
-                    </Html>
-                )}
-            </group>
-        );
-    } catch (error) {
-        console.error("Failed to load 3D asset:", asset.url, error);
-        return null; // Fail gracefully
-    }
+    const { scene } = useGLTF(asset.url);
+    const copiedScene = React.useMemo(() => scene.clone(), [scene]);
+    
+    // Auto-scale logic could go here based on bounding box
+    
+    return (
+        <group position={position} rotation={rotation} onClick={(e) => {
+            e.stopPropagation();
+            onSelect();
+        }}>
+            <primitive object={copiedScene} />
+            {isSelected && (
+                <Html position={[0, 1.5, 0]}>
+                    <div className="bg-white/80 p-2 rounded-full shadow-lg backdrop-blur flex gap-2">
+                       <button onClick={onDelete} className="p-1 text-red-500 hover:bg-red-100 rounded">
+                           <Trash2 size={16} />
+                       </button>
+                    </div>
+                </Html>
+            )}
+        </group>
+    );
 }
 
 function TexturedPlane({ textureUrl, position, rotation, onSelect, isSelected }) {
-    // Safety check for URL
-    if (!textureUrl) return null;
-
-    try {
-        const texture = useLoader(THREE.TextureLoader, textureUrl);
-        return (
-            <mesh position={position} rotation={rotation} onClick={(e) => { e.stopPropagation(); onSelect(); }}>
-                <planeGeometry args={[2, 2]} />
-                <meshStandardMaterial map={texture} side={THREE.DoubleSide} transparent />
-                {isSelected && (
-                    <Html position={[0, 1.5, 0]}>
-                        <div className="bg-white/80 p-1 rounded-full shadow-lg">
-                        <Move size={16} className="text-gray-600"/>
-                        </div>
-                    </Html>
-                )}
-            </mesh>
-        );
-    } catch (error) {
-        console.error("Failed to load texture:", textureUrl, error);
-        return null;
-    }
+    const texture = useLoader(THREE.TextureLoader, textureUrl);
+    return (
+        <mesh position={position} rotation={rotation} onClick={(e) => { e.stopPropagation(); onSelect(); }}>
+            <planeGeometry args={[2, 2]} />
+            <meshStandardMaterial map={texture} side={THREE.DoubleSide} />
+             {isSelected && (
+                <Html position={[0, 1.5, 0]}>
+                    <div className="bg-white/80 p-1 rounded-full shadow-lg">
+                       <Move size={16} className="text-gray-600"/>
+                    </div>
+                </Html>
+            )}
+        </mesh>
+    );
 }
 
 function Scene({ placedItems, selectedId, onSelect, updateItem }) {

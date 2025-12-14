@@ -80,11 +80,6 @@ export class DataManager {
         // 3. Sync Logic (Compare Timestamps)
         await this.sync(localData, remoteData);
         
-        // Safety check
-        if (!Array.isArray(this.data.assets_json.items)) {
-            this.data.assets_json.items = [];
-        }
-
         return this.data;
     }
 
